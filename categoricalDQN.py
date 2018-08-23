@@ -45,13 +45,13 @@ class C51Agent:
         self.observe = 100
         self.explore = 100
         self.frame_per_action = 4
-        self.update_target_freq = 10 
+        self.update_target_freq = 100 
         self.timestep_per_train = 100 # Number of timesteps between training interval
         self.episodes = 50
 
         # Initialize Atoms
         self.num_atoms = num_atoms # 51 for C51
-        self.v_max = 30 # Max possible score for Defend the center is 26 - 0.1*26 = 23.4
+        self.v_max = 10 # Max possible score for Defend the center is 26 - 0.1*26 = 23.4
         self.v_min = -10 # -0.1*26 - 1 = -3.6
         self.delta_z = (self.v_max - self.v_min) / float(self.num_atoms - 1)
         self.z = [self.v_min + i * self.delta_z for i in range(self.num_atoms)]
@@ -65,11 +65,11 @@ class C51Agent:
         self.target_model = None
 
         # Performance Statistics
-        self.stats_window_size= 50 # window size for computing rolling statistics
-        self.mavg_score = [] # Moving Average of Survival Time
-        self.var_score = [] # Variance of Survival Time
-        self.mavg_ammo_left = [] # Moving Average of Ammo used
-        self.mavg_kill_counts = [] # Moving Average of Kill Counts
+#        self.stats_window_size= 50 # window size for computing rolling statistics
+#        self.mavg_score = [] # Moving Average of Survival Time
+#        self.var_score = [] # Variance of Survival Time
+#        self.mavg_ammo_left = [] # Moving Average of Ammo used
+#        self.mavg_kill_counts = [] # Moving Average of Kill Counts
 
     def update_target_model(self):
         """
@@ -198,9 +198,10 @@ if __name__ == "__main__":
     x_t = env.reset()
     action_size = env.action_space.n
 
-    img_rows , img_cols = 210, 160
+    print(x_t.shape)
+    img_rows , img_cols, img_channels=x_t.shape
     # Convert image into Black and white
-    img_channels = 3 # We stack 4 frames
+#    img_channels = 3 # We stack 4 frames
     # C51
     num_atoms = 51
     state_size = (img_rows, img_cols, img_channels)
@@ -214,6 +215,7 @@ if __name__ == "__main__":
     t = 0
     max_life = 0 
     life = 0
+    R = 0
 #    while not is_terminated:
     while GAME < agent.episodes:
 
@@ -235,7 +237,9 @@ if __name__ == "__main__":
 #
 #        r_t = game.get_last_reward()  #each frame we get reward of 0.1, so 4 frames will be 0.4
         x_t1, r_t, is_terminated, info = env.step(action_idx)
-        env.render()
+#        env.render()
+        R += r_t
+        print(t, R)
 
         if (is_terminated):
             GAME += 1
@@ -266,7 +270,8 @@ if __name__ == "__main__":
         #print('isterminated=',is_terminated,'reward=',r_t)
 
         if (is_terminated):
-            print("TIME", t, "/ GAME", GAME, "/ STATE", state)
+            print("TIME", t, "/ GAME", GAME, "/ STATE", state,"/ Reward",R)
+            R = 0
 
             # Save Agent's Performance Statistics
 #            if GAME % agent.stats_window_size == 0 and t > agent.observe: 
