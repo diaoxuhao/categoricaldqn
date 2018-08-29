@@ -9,8 +9,8 @@
 \section{近似分布学习：算法与数值实验}
 \subsection{近似分布学习}
 \subsection{算法实现细节}
-本次作业中，我们实现了经验重放的近似分布学习 Double DQN 算法，
-在 OpenAI gym 环境下对 Atari 游戏 Alien 进行学习，
+本次作业中，我们实现了经验重放的近似分布学习 Double DQN 算法 C51，
+在 OpenAI gym 环境下对 Atari 游戏 Alien-v0 进行学习，
 并与 OpenAI Baselines:DQN 算法在相同机器上进行了效果比较。
 \par
 我们实现的算法有如下值得提及的细节：
@@ -22,13 +22,14 @@
                 在这一阶段，智能体完全随机选择每一步的行动$a_t$，并将观测到的转换组
                 $(\phi_t,a_t,r_t,\phi_{t+1})$ 存入重放缓存中。
                 此时的智能体不进行网络的训练；
-        \item 智能体在观察阶段后的 $N_{\text e}$ 个时间步内为探索阶段。
+        \item 观察阶段后的 $N_{\text e}$ 个时间步为探索阶段。
                 在探索阶段，智能体仍然完全随机选择每一步的行动，并存储相应的转换组
                 作为经验。但此时的智能体开始初步学习，训练网络；
         \item 智能体在探索阶段后进入训练阶段。
                 此时的智能体按照 $\epsilon$-贪心方法选择动作$a_t$，仍然存储经验并训练网络。
                 值得注意的是，在前两个阶段，随机选择行动 $a_t$ 相当于参数 $\epsilon=1$ 的
                 $\epsilon$-贪心方法。在训练阶段，我们并不给定一个固定的 $\epsilon$ 值，而是以
+                如下准则：
                 \[
                     \epsilon \leftarrow \epsilon_0 - \min {\left(1, \frac{ t-(N_{\text{o}}+N_{\text{e}})}
                        {f_{\text{e}}M}\right) \cdot (\epsilon_0 - \epsilon_{\min})}
@@ -103,6 +104,13 @@ $V_{\min}$ &$V_{\max}$	&$N_{\text{atom}}$ &$N_{\text o}$ &$N_{\text e}$	&$M$&$f_
 \centering
 \includegraphics[scale=.8]{alien_random.png}
 \end{figure}
+另外，在同样的硬件环境下对 baselines: DQN 同样训练 500000 步，而后在 100 个 episodes 下进行测试，测试结果如下：
+\begin{figure}[H]
+\centering
+\includegraphics[scale=.8]{alien_dqn.png}
+\end{figure}
+可以看出，baselines: DQN 算法在 Alien-v0 游戏的学习中，在期望意义下的表现的确弱于我们实现的近似分布学习方法。并且 DQN 算法中智能体的行为方式的确显著区别于近似分布学习方法的智能体。
+\par
 从测试表现中可以看出，训练后的智能体得分分别集中在 500 分附近和 1000 分附近。通过观察游戏画面，我们发现，两个得分范围的差别主要在于游戏主角是否杀死过敌人。如果有更好的硬件设备进行更长时间的训练，我们有信心将测试平均分提升到 1000 分左右。
 %%%%%%%%%%%%%%%%%%%%%
 \end{document}
